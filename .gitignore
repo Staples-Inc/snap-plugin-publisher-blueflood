@@ -1,0 +1,5 @@
+vendor/*
+*.yaml
+*.sh
+build/
+build/*

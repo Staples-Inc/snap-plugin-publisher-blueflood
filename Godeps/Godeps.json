@@ -1,5 +1,5 @@
 {
-	"ImportPath": "stash.staples.com/scm/rtm/snap-plugin-publisher-blueflood",
+	"ImportPath": "github.com/Staples-Inc/snap-plugin-publisher-blueflood",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v74",
 	"Deps": [

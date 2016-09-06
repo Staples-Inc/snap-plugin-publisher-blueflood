@@ -1,4 +1,7 @@
 # snap publisher plugin - blueflood
+
+[![Build Status](https://travis-ci.org/Staples-Inc/snap-plugin-publisher-blueflood.svg?branch=master)](https://travis-ci.org/Staples-Inc/snap-plugin-publisher-blueflood)
+
 Publishes data to [Blueflood](http://blueflood.io/), a [Cassandra](http://cassandra.apache.org/) based ingest engine.
 
 1. [Getting Started](#getting-started)

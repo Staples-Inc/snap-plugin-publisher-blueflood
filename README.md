@@ -6,7 +6,7 @@ Publishes data to [Blueflood](http://blueflood.io/), a [Cassandra](http://cassan
   * [Operating Systems](#operating-systems))
   * [Build](#build)
 2. [Contributing](#contributing)
-4. [License](#license)
+3. [License](#license)
 
 ## Getting Started
 A working snap agent and a running instance of Blueflood is required to use this plugin.

@@ -10,57 +10,57 @@
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/cpolicy",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/encoding",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/control/plugin/encrypter",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/cdata",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/ctypes",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/core/serror",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/pkg/ctree",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/pkg/schedule",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{
 			"ImportPath": "github.com/intelsdi-x/snap/scheduler/wmap",
-			"Comment": "v0.14.0-beta-2-g3777f43",
+			"Comment": "v0.9.0-beta-462-g3777f43",
 			"Rev": "3777f4376adecef6be7db1b972f7504c4a24aba0"
 		},
 		{

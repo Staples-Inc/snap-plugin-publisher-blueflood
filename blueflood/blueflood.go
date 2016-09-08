@@ -1,3 +1,5 @@
+package blueflood
+
 /*
 Copyright 2016 Staples, Inc.
 
@@ -13,7 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package blueflood
 
 import (
 	"bytes"
@@ -79,6 +80,8 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 	req.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(req)
+	defer response.Body.Close()
+
 	if err != nil {
 		logger.Printf("Error performing request, err: %v", response)
 		return

@@ -73,25 +73,26 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 	req, err := http.NewRequest("POST", server, buff)
 
 	if err != nil {
-		logger.Printf("Error creating Ingest POST request, error: %s\n", err.Error())
+		logger.Warnf("Error creating Ingest POST request, error: %s\n", err.Error())
 		return
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(req)
-	defer response.Body.Close()
 
 	if err != nil {
-		logger.Printf("Error performing request, err: %v", response)
+		logger.Warnf("Error performing request, err: %v", response)
 		return
 	}
 
 	if response.StatusCode != 200 {
-		logger.Printf("Error: Metrics request not ingested, status: %v", response.StatusCode)
-		return
+		logger.Warnf("Error: Metrics request not ingested, status: %v", response.StatusCode)
+	} else {
+		logger.Infof("status - %v", response.StatusCode)
 	}
 
+	response.Body.Close()
 	return
 }
 
@@ -130,21 +131,19 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 			d, ok := strconv.ParseFloat(m.Data().(string), 64)
 			if ok == nil {
 				data = append(data, ingestMetric{MetricName: m.Namespace().Key(), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
-			} else {
-				logger.Infof("String '%v' was not able to be parsed into a numeric", m.Data())
 			}
 		default:
 			logger.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace(), v)
 		}
 
 		if len(data) == rollUpNum {
-			go publishMetrics(data, server, timeout, logger)
+			publishMetrics(data, server, timeout, logger)
 			data = []ingestMetric{}
 		}
 	}
 
 	if len(data) > 0 {
-		go publishMetrics(data, server, timeout, logger)
+		publishMetrics(data, server, timeout, logger)
 	}
 
 	return nil
@@ -165,7 +164,7 @@ func (b *BluefloodPublisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
 	handleConfigErr(err)
 	serverName.Description = "Blueflood host address"
 
-	rollUpNum, err := cpolicy.NewIntegerRule("rollupNum", false, 20)
+	rollUpNum, err := cpolicy.NewIntegerRule("rollupNum", false, 100)
 	handleConfigErr(err)
 	rollUpNum.Description = "Configurable value to break up blueflood ingest requests into chunks of metrics"
 

@@ -25,7 +25,7 @@
             {
               "plugin_name": "blueflood",
               "config": {
-                "server": "[SERVER INGEST ENDPOINT]" //Replace with your blueflood enpoint
+                "server": "http://localhost:9000"
               }
             }
           ]

@@ -66,10 +66,6 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 	}
 
 	buff := bytes.NewReader(jsonData)
-
-	httptimeout := time.Duration(timeout) * time.Second
-	client := &http.Client{Timeout: httptimeout} //Add configurable connect timeout
-
 	req, err := http.NewRequest("POST", server, buff)
 
 	if err != nil {
@@ -77,22 +73,25 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 		return
 	}
 
+	httptimeout := time.Duration(timeout) * time.Second
+	client := &http.Client{Timeout: httptimeout}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(req)
+	defer response.Body.Close()
 
 	if err != nil {
-		logger.Warnf("Error performing request, err: %v", response)
+		logger.Warnf("response failed: %v", err)
 		return
 	}
 
 	if response.StatusCode != 200 {
-		logger.Warnf("Error: Metrics request not ingested, status: %v", response.StatusCode)
+		logger.Warnf("Metrics not ingested, status: %v", response.StatusCode)
 	} else {
 		logger.Infof("status - %v", response.StatusCode)
 	}
 
-	response.Body.Close()
 	return
 }
 
@@ -108,9 +107,8 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 			return err
 		}
 	default:
-		logger.Printf("Error unknown content type '%v'", contentType)
+		logger.Warnf("Error unknown content type '%v'", contentType)
 		return fmt.Errorf("Unknown content type '%s'", contentType)
-
 	}
 
 	server := config["server"].(ctypes.ConfigValueStr).Value
@@ -119,7 +117,6 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 	timeout := config["timeout"].(ctypes.ConfigValueInt).Value
 
 	data := []ingestMetric{}
-
 	for _, m := range metrics {
 		if m.Namespace().String() == "" { //Ensure empty namespaces are not sent to blueflood
 			continue
@@ -137,13 +134,13 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 		}
 
 		if len(data) == rollUpNum {
-			publishMetrics(data, server, timeout, logger)
+			go publishMetrics(data, server, timeout, logger)
 			data = []ingestMetric{}
 		}
 	}
 
 	if len(data) > 0 {
-		publishMetrics(data, server, timeout, logger)
+		go publishMetrics(data, server, timeout, logger)
 	}
 
 	return nil

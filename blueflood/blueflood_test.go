@@ -128,7 +128,7 @@ func TestBluefloodPluginMetrics(t *testing.T) {
 			So(err, ShouldBeNil)
 		})
 
-		Convey("Publish non-numeric strings metrics\n", func() { // Should result in no metrics being pushed
+		Convey("Publish non-numeric strings metrics", func() { // Should result in no metrics being pushed
 			enc.Encode(stringMetrics)
 			err := bp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
 			So(err, ShouldBeNil)

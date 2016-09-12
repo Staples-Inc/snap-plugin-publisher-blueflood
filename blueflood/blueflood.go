@@ -118,7 +118,9 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 
 	data := []ingestMetric{}
 	for _, m := range metrics {
-		if m.Namespace().String() == "" { //Ensure empty namespaces are not sent to blueflood
+
+		//Ensure empty namespaces are not sent to blueflood
+		if m.Namespace().String() == "" {
 			continue
 		}
 		switch v := m.Data().(type) {

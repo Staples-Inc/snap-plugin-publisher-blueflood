@@ -79,12 +79,13 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 	req.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(req)
-	defer response.Body.Close()
 
 	if err != nil {
 		logger.Warnf("response failed: %v", err)
 		return
 	}
+
+	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
 		logger.Warnf("Metrics not ingested, status: %v", response.StatusCode)

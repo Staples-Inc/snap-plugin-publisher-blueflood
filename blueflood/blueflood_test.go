@@ -91,11 +91,11 @@ func TestBluefloodPluginMetrics(t *testing.T) {
 		*plugin.NewMetricType(core.NewNamespace("/staples/test/string2"), time.Now().Add(2*time.Second), nil, "string", "2"),
 		*plugin.NewMetricType(core.NewNamespace("/staples/test/string3"), time.Now().Add(3*time.Second), nil, "string", "3"),
 	}
-	// stringMetrics := []plugin.MetricType{
-	// 	*plugin.NewMetricType(core.NewNamespace("/staples/test/string1"), time.Now(), nil, "string", "one"),
-	// 	*plugin.NewMetricType(core.NewNamespace("/staples/test/string2"), time.Now().Add(2*time.Second), nil, "string", "two"),
-	// 	*plugin.NewMetricType(core.NewNamespace("/staples/test/string3"), time.Now().Add(3*time.Second), nil, "string", "three"),
-	// }
+	stringMetrics := []plugin.MetricType{
+		*plugin.NewMetricType(core.NewNamespace("/staples/test/string1"), time.Now(), nil, "string", "one"),
+		*plugin.NewMetricType(core.NewNamespace("/staples/test/string2"), time.Now().Add(2*time.Second), nil, "string", "two"),
+		*plugin.NewMetricType(core.NewNamespace("/staples/test/string3"), time.Now().Add(3*time.Second), nil, "string", "three"),
+	}
 	config["server"] = ctypes.ConfigValueStr{Value: "http://localhost:9090"}
 	config["rollupNum"] = ctypes.ConfigValueInt{Value: 20}
 	config["ttlInSeconds"] = ctypes.ConfigValueInt{Value: 172800}
@@ -128,11 +128,11 @@ func TestBluefloodPluginMetrics(t *testing.T) {
 			So(err, ShouldBeNil)
 		})
 
-		// Convey("Publish non-numeric strings metrics", func() { // Should result in no metrics being pushed
-		// 	enc.Encode(stringMetrics)
-		// 	err := bp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
-		// 	So(err, ShouldBeNil)
-		// })
+		Convey("Publish non-numeric strings metrics", func() { // Should result in no metrics being pushed
+			enc.Encode(stringMetrics)
+			err := bp.Publish(plugin.SnapGOBContentType, buf.Bytes(), *cfg)
+			So(err, ShouldBeNil)
+		})
 
 	})
 

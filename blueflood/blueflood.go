@@ -23,12 +23,13 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-
 	"github.com/intelsdi-x/snap/control/plugin"
 	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
+	"github.com/intelsdi-x/snap/core"
 	"github.com/intelsdi-x/snap/core/ctypes"
 )
 
@@ -126,11 +127,11 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 		}
 		switch v := m.Data().(type) {
 		case float32, float64, int, int32, int64, uint32, uint64:
-			data = append(data, ingestMetric{MetricName: m.Namespace().Key(), MetricValue: m.Data(), TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
+			data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: m.Data(), TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 		case string:
 			d, ok := strconv.ParseFloat(m.Data().(string), 64)
 			if ok == nil {
-				data = append(data, ingestMetric{MetricName: m.Namespace().Key(), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
+				data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 			}
 		default:
 			logger.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace(), v)
@@ -153,6 +154,12 @@ func handleConfigErr(e error) {
 	if e != nil {
 		log.Panicf("Error: Config Policy not set correctly: %v", e)
 	}
+}
+
+// Key returns a string representation of the namespace with "." joining
+// the elements of the namespace.
+func Key(n core.Namespace) string {
+	return strings.Join(n.Strings(), ".")
 }
 
 // GetConfigPolicy gathers configurations for the blueflood publisher

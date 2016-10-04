@@ -2,7 +2,7 @@ sudo: required
 language: go
 go:
 - 1.6.3
-- 1.7
+- 1.7.1
 env:
   global:
     - SNAP_PLUGIN_SOURCE=/home/travis/gopath/src/github.com/Staples-Inc/snap-plugin-publisher-blueflood

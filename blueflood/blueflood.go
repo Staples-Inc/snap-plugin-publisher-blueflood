@@ -21,6 +21,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -126,7 +127,12 @@ func (b *BluefloodPublisher) Publish(contentType string, content []byte, config 
 			continue
 		}
 		switch v := m.Data().(type) {
-		case float32, float64, int, int32, int64, uint32, uint64:
+		case float64:
+			if math.IsNaN(m.Data().(float64)) {
+				logger.Warningf("Data NaN and not serializable '%v': Type %T", m.Namespace(), v)
+				continue
+			}
+		case float32, int, int32, int64, uint32, uint64:
 			data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: m.Data(), TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 		case string:
 			d, ok := strconv.ParseFloat(m.Data().(string), 64)

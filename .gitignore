@@ -1,5 +1,4 @@
 vendor/*
-*.yaml
 build/
 build/*
 snap-plugin-publisher-blueflood

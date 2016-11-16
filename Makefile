@@ -3,7 +3,7 @@ default:
 	$(MAKE) deps
 	$(MAKE) all
 deps:
-	bash -c "godep restore"
+	bash -c "glide install"
 test:
 	bash -c "./scripts/test.sh $(TEST)"
 all:

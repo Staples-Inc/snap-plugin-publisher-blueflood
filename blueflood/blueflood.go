@@ -18,9 +18,7 @@ limitations under the License.
 
 import (
 	"bytes"
-	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -28,39 +26,25 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/intelsdi-x/snap/control/plugin"
-	"github.com/intelsdi-x/snap/control/plugin/cpolicy"
-	"github.com/intelsdi-x/snap/core"
-	"github.com/intelsdi-x/snap/core/ctypes"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 )
 
 type ingestMetric struct {
 	CollectionTime int64       `json:"collectionTime"`
-	TTLInSeconds   int         `json:"ttlInSeconds"`
+	TTLInSeconds   int64       `json:"ttlInSeconds"`
 	MetricValue    interface{} `json:"metricValue"`
 	MetricName     string      `json:"metricName"`
 }
 
-const (
-	pluginName    = "blueflood"
-	pluginVersion = 1
-	pluginType    = plugin.PublisherPluginType
-)
+// BfPublisher allows for publishing metrics to blueflood
+type BfPublisher struct{}
 
-// Meta information about this plugin
-func Meta() *plugin.PluginMeta {
-	return plugin.NewPluginMeta(pluginName, pluginVersion, pluginType, []string{plugin.SnapGOBContentType}, []string{plugin.SnapGOBContentType})
+// NewBfPublisher returns a blueflood publisher
+func NewBfPublisher() BfPublisher {
+	return BfPublisher{}
 }
 
-// BluefloodPublisher allows for publishing metrics to blueflood
-type BluefloodPublisher struct{}
-
-// NewBluefloodPublisher returns a blueflood publisher
-func NewBluefloodPublisher() *BluefloodPublisher {
-	return &BluefloodPublisher{}
-}
-
-func publishMetrics(data []ingestMetric, server string, timeout int, logger *log.Logger) {
+func publishMetrics(data []ingestMetric, server string, timeout int64, logger *log.Logger) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		logger.Printf("Error marshalling json data: %s\n", err.Error())
@@ -99,52 +83,54 @@ func publishMetrics(data []ingestMetric, server string, timeout int, logger *log
 }
 
 // Publish metrics to the configured blueflood server at the specified address
-func (b *BluefloodPublisher) Publish(contentType string, content []byte, config map[string]ctypes.ConfigValue) error {
+func (b BfPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 	logger := log.New()
-	var metrics []plugin.MetricType
-	switch contentType {
-	case plugin.SnapGOBContentType:
-		dec := gob.NewDecoder(bytes.NewBuffer(content))
-		if err := dec.Decode(&metrics); err != nil {
-			logger.Printf("Error decoding GOB: error=%v content=%v", err, content)
-			return err
-		}
-	default:
-		logger.Warnf("Error unknown content type '%v'", contentType)
-		return fmt.Errorf("Unknown content type '%s'", contentType)
+	server, err := cfg.GetString("server")
+	if err != nil {
+		log.Errorf("unable to parse blueflood server from configs")
+		return err
+	}
+	rollUpNum, err := cfg.GetInt("rollupNum")
+	if err != nil {
+		log.Errorf("unable to parse blueflood rollUpNum from configs")
+		return err
+	}
+	ttlInSeconds, err := cfg.GetInt("ttlInSeconds")
+	if err != nil {
+		log.Errorf("unable to parse blueflood ttlInSeconds from configs")
+		return err
+	}
+	timeout, err := cfg.GetInt("timeout")
+	if err != nil {
+		log.Errorf("unable to parse blueflood timeout from configs")
+		return err
 	}
 
-	server := config["server"].(ctypes.ConfigValueStr).Value
-	rollUpNum := config["rollupNum"].(ctypes.ConfigValueInt).Value
-	ttlInSeconds := config["ttlInSeconds"].(ctypes.ConfigValueInt).Value
-	timeout := config["timeout"].(ctypes.ConfigValueInt).Value
-
 	data := []ingestMetric{}
-	for _, m := range metrics {
-
+	for _, m := range mts {
 		//Ensure empty namespaces are not sent to blueflood
-		if m.Namespace().String() == "" {
+		if len(m.Namespace.Strings()) < 1 {
 			continue
 		}
-		switch v := m.Data().(type) {
+		switch v := m.Data.(type) {
 		case float64:
-			if math.IsNaN(m.Data().(float64)) {
-				logger.Warningf("Data NaN and not serializable '%v': Type %T", m.Namespace(), v)
+			if math.IsNaN(m.Data.(float64)) {
+				logger.Warningf("Data NaN and not serializable '%v': Type %T", m.Namespace, v)
 				continue
 			}
-			data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: m.Data(), TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
+			data = append(data, ingestMetric{MetricName: Key(m.Namespace.Strings()), MetricValue: m.Data, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 		case float32, int, int32, int64, uint32, uint64:
-			data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: m.Data(), TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
+			data = append(data, ingestMetric{MetricName: Key(m.Namespace.Strings()), MetricValue: m.Data, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 		case string:
-			d, ok := strconv.ParseFloat(m.Data().(string), 64)
+			d, ok := strconv.ParseFloat(m.Data.(string), 64)
 			if ok == nil {
-				data = append(data, ingestMetric{MetricName: Key(m.Namespace()), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
+				data = append(data, ingestMetric{MetricName: Key(m.Namespace.Strings()), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 			}
 		default:
-			logger.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace(), v)
+			logger.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace, v)
 		}
 
-		if len(data) == rollUpNum {
+		if int64(len(data)) == rollUpNum {
 			go publishMetrics(data, server, timeout, logger)
 			data = []ingestMetric{}
 		}
@@ -165,35 +151,16 @@ func handleConfigErr(e error) {
 
 // Key returns a string representation of the namespace with "." joining
 // the elements of the namespace.
-func Key(n core.Namespace) string {
-	return strings.Join(n.Strings(), ".")
+func Key(n []string) string {
+	return strings.Join(n, ".")
 }
 
 // GetConfigPolicy gathers configurations for the blueflood publisher
-func (b *BluefloodPublisher) GetConfigPolicy() (*cpolicy.ConfigPolicy, error) {
-	cp := cpolicy.New()
-	config := cpolicy.NewPolicyNode()
-
-	serverName, err := cpolicy.NewStringRule("server", true)
-	handleConfigErr(err)
-	serverName.Description = "Blueflood host address"
-
-	rollUpNum, err := cpolicy.NewIntegerRule("rollupNum", false, 100)
-	handleConfigErr(err)
-	rollUpNum.Description = "Configurable value to break up blueflood ingest requests into chunks of metrics"
-
-	ttlInSeconds, err := cpolicy.NewIntegerRule("ttlInSeconds", false, 172800)
-	handleConfigErr(err)
-	ttlInSeconds.Description = "Blueflood ingest setting for number of seconds before data expires in blueflood ingest"
-
-	timeoutVal, err := cpolicy.NewIntegerRule("timeout", false, 0)
-	handleConfigErr(err)
-	timeoutVal.Description = "Number of seconds to timeout out requests to the blueflood server"
-
-	config.Add(serverName)
-	config.Add(rollUpNum)
-	config.Add(ttlInSeconds)
-	config.Add(timeoutVal)
-	cp.Add([]string{""}, config)
-	return cp, nil
+func (b BfPublisher) GetConfigPolicy() (plugin.ConfigPolicy, error) {
+	policy := plugin.NewConfigPolicy()
+	policy.AddNewStringRule([]string{""}, "server", true)
+	policy.AddNewIntRule([]string{""}, "rollupNum", false, plugin.SetDefaultInt(100))
+	policy.AddNewIntRule([]string{""}, "ttlInSeconds", false, plugin.SetDefaultInt(172800))
+	policy.AddNewIntRule([]string{""}, "timeout", false, plugin.SetDefaultInt(0))
+	return *policy, nil
 }

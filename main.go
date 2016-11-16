@@ -17,11 +17,14 @@ package main
 
 import (
 	"github.com/Staples-Inc/snap-plugin-publisher-blueflood/blueflood"
-	"github.com/intelsdi-x/snap/control/plugin"
-	"os"
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
+)
+
+const (
+	pluginName    = "blueflood"
+	pluginVersion = 2
 )
 
 func main() {
-	meta := blueflood.Meta()
-	plugin.Start(meta, blueflood.NewBluefloodPublisher(), os.Args[1])
+	plugin.StartPublisher(blueflood.NewBfPublisher(), pluginName, pluginVersion)
 }

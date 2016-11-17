@@ -54,6 +54,11 @@ func TestBluefloodPluginMetrics(t *testing.T) {
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "float2"), Timestamp: time.Now().Add(2 * time.Second), Data: 2.5},
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "float3"), Timestamp: time.Now().Add(3 * time.Second), Data: 3.5},
 	}
+	uint64Metrics := []plugin.Metric{
+		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "float1"), Timestamp: time.Now(), Data: uint64(15)},
+		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "float2"), Timestamp: time.Now().Add(2 * time.Second), Data: uint64(25)},
+		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "float3"), Timestamp: time.Now().Add(3 * time.Second), Data: uint64(35)},
+	}
 	stringIntMetrics := []plugin.Metric{
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "string1"), Timestamp: time.Now(), Data: "1"},
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "string2"), Timestamp: time.Now().Add(2 * time.Second), Data: "2"},
@@ -87,6 +92,10 @@ func TestBluefloodPluginMetrics(t *testing.T) {
 		})
 		Convey("Publish non-numeric strings metrics", func() { // Should result in no metrics being pushed
 			err := bp.Publish(stringMetrics, testConfig)
+			So(err, ShouldBeNil)
+		})
+		Convey("Publish uint64 metrics", func() {
+			err := bp.Publish(uint64Metrics, testConfig)
 			So(err, ShouldBeNil)
 		})
 	})

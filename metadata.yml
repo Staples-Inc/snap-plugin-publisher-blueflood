@@ -1,0 +1,9 @@
+name: blueflood
+type: publisher
+maintainer: staples
+license: Apache-2.0
+description: "Publishes metrics to a blueflood endpoint."
+badge:
+  - "[![Build Status](https://travis-ci.org/Staples-Inc/snap-plugin-publisher-blueflood.svg?branch=master)](https://travis-ci.org/Staples-Inc/snap-plugin-publisher-blueflood)"
+ci:
+  - https://travis-ci.org/Staples-Inc/snap-plugin-publisher-blueflood

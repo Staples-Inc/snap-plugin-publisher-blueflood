@@ -44,10 +44,10 @@ func NewBfPublisher() BfPublisher {
 	return BfPublisher{}
 }
 
-func publishMetrics(data []ingestMetric, server string, timeout int64, logger *log.Logger) {
+func publishMetrics(data []ingestMetric, server string, timeout int64) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		logger.Printf("Error marshalling json data: %s\n", err.Error())
+		log.Printf("Error marshalling json data: %s\n", err.Error())
 		return
 	}
 
@@ -55,7 +55,7 @@ func publishMetrics(data []ingestMetric, server string, timeout int64, logger *l
 	req, err := http.NewRequest("POST", server, buff)
 
 	if err != nil {
-		logger.Warnf("Error creating Ingest POST request, error: %s\n", err.Error())
+		log.Warnf("Error creating Ingest POST request, error: %s\n", err.Error())
 		return
 	}
 
@@ -67,16 +67,16 @@ func publishMetrics(data []ingestMetric, server string, timeout int64, logger *l
 	response, err := client.Do(req)
 
 	if err != nil {
-		logger.Warnf("response failed: %v", err)
+		log.Warnf("response failed: %v", err)
 		return
 	}
 
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		logger.Warnf("Metrics not ingested, status: %v", response.StatusCode)
+		log.Warnf("status: %v; metrics not ingested", response.StatusCode)
 	} else {
-		logger.Infof("status - %v", response.StatusCode)
+		log.Debugf("status %v\n", response.StatusCode)
 	}
 
 	return
@@ -84,7 +84,6 @@ func publishMetrics(data []ingestMetric, server string, timeout int64, logger *l
 
 // Publish metrics to the configured blueflood server at the specified address
 func (b BfPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
-	logger := log.New()
 	server, err := cfg.GetString("server")
 	if err != nil {
 		log.Errorf("unable to parse blueflood server from configs")
@@ -115,7 +114,7 @@ func (b BfPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 		switch v := m.Data.(type) {
 		case float64:
 			if math.IsNaN(m.Data.(float64)) {
-				logger.Warningf("Data NaN and not serializable '%v': Type %T", m.Namespace, v)
+				log.Warningf("Data NaN and not serializable '%v': Type %T", m.Namespace, v)
 				continue
 			}
 			data = append(data, ingestMetric{MetricName: Key(m.Namespace.Strings()), MetricValue: m.Data, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
@@ -127,17 +126,17 @@ func (b BfPublisher) Publish(mts []plugin.Metric, cfg plugin.Config) error {
 				data = append(data, ingestMetric{MetricName: Key(m.Namespace.Strings()), MetricValue: d, TTLInSeconds: ttlInSeconds, CollectionTime: time.Now().Unix() * 1000})
 			}
 		default:
-			logger.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace, v)
+			log.Warningf("Unknown data received for metric '%v': Type %T", m.Namespace, v)
 		}
 
 		if int64(len(data)) == rollUpNum {
-			go publishMetrics(data, server, timeout, logger)
+			go publishMetrics(data, server, timeout)
 			data = []ingestMetric{}
 		}
 	}
 
 	if len(data) > 0 {
-		go publishMetrics(data, server, timeout, logger)
+		go publishMetrics(data, server, timeout)
 	}
 
 	return nil

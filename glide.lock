@@ -1,5 +1,5 @@
 hash: 7e39e14d97b1ab8855ce8b74b8fcb442e912a4b34c0ab17b89bbd0b93ee4bf46
-updated: 2016-11-17T09:38:53.399461774-05:00
+updated: 2016-12-15T15:38:53.473075971-05:00
 imports:
 - name: github.com/golang/protobuf
   version: 888eb0692c857ec880338addf316bd662d5e630e
@@ -11,7 +11,7 @@ imports:
   - v1/plugin
   - v1/plugin/rpc
 - name: github.com/julienschmidt/httprouter
-  version: 4563b0ba73e4db6c6423b60a26f3cadd2e9a1ec9
+  version: 8c199fb6259ffc1af525cc3ad52ee60ba8359669
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: golang.org/x/net
@@ -24,7 +24,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: c200b10b5d5e122be351b67af224adc6128af5bf
+  version: 7f918dd405547ecb864d14a8ecbbfe205b5f930f
   subpackages:
   - unix
 - name: google.golang.org/grpc
@@ -43,6 +43,8 @@ testImports:
   version: 4b53e1bddba0e2f734514aeb6c02db652f4c6fe8
   subpackages:
   - js
+- name: github.com/jarcoal/httpmock
+  version: 145b10d659265440f062c31ea15326166bae56ee
 - name: github.com/jtolds/gls
   version: 8ddce2a84170772b95dd5d576c48d517b22cac63
 - name: github.com/smartystreets/assertions

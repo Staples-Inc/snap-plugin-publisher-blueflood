@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
+	"github.com/jarcoal/httpmock"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -43,6 +44,12 @@ func TestBluefloodPlugin(t *testing.T) {
 }
 
 func TestBluefloodPluginMetrics(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("POST", "http://localhost:9090",
+		httpmock.NewStringResponder(200, ""))
+
 	intMetrics := []plugin.Metric{
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "int1"), Timestamp: time.Now(), Data: 1},
 		plugin.Metric{Namespace: plugin.NewNamespace("staples", "test", "int1"), Timestamp: time.Now(), Data: 1},

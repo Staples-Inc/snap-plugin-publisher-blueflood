@@ -25,7 +25,7 @@
             {
               "plugin_name": "blueflood",
               "config": {
-                "server": "http://localhost:8080"
+                "server": "http://localhost:8080/v2.0/700/ingest"
               }
             }
           ]
